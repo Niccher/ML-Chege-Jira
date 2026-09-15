@@ -28,7 +28,7 @@ class Settings(BaseSettings):
 
     # LLM Settings
     MODELS_DIR: Path = Path("/app/models")
-    DEFAULT_MODEL: str = "mistral-7b"
+    DEFAULT_MODEL: str = "phi3-mini"
     N_GPU_LAYERS: int = 0
     N_THREADS: int = 4
     N_CTX: int = 4096
