@@ -1,4 +1,4 @@
-"""Llama.cpp LLM engine manager with lazy loading, concurrency locks, downloads, and metrics."""
+"""Llama.cpp LLM engine manager with lazy loading, concurrency locks, downloads, specs, and metrics."""
 
 import asyncio
 import json
@@ -26,10 +26,53 @@ except ImportError:
 
 
 MODEL_DOWNLOAD_URLS: dict[str, str] = {
+    "phi3-mini": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf",
     "mistral-7b": "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf",
     "llama3-8b": "https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resolve/main/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf",
-    "phi3-mini": "https://huggingface.co/microsoft/Phi-3-mini-4k-instruct-gguf/resolve/main/Phi-3-mini-4k-instruct-q4.gguf",
     "deepseek-7b": "https://huggingface.co/TheBloke/deepseek-coder-7b-instruct-v1.5-GGUF/resolve/main/deepseek-coder-7b-instruct-v1.5.Q4_K_M.gguf",
+}
+
+MODEL_METADATA: dict[str, dict[str, Any]] = {
+    "phi3-mini": {
+        "name": "Phi-3 Mini 4K Instruct",
+        "provider": "Microsoft",
+        "params": "3.8B",
+        "quant": "Q4_K_M",
+        "approx_size_gb": 2.2,
+        "recommended_ram_gb": 2.5,
+        "best_for": "Ultra-fast CPU inference, lightweight tasks, priority estimation, time log summaries",
+        "badge_color": "success",
+    },
+    "mistral-7b": {
+        "name": "Mistral 7B Instruct v0.2",
+        "provider": "Mistral AI",
+        "params": "7.3B",
+        "quant": "Q4_K_M",
+        "approx_size_gb": 4.1,
+        "recommended_ram_gb": 4.5,
+        "best_for": "Best all-round performance for Jira ticket expansion, agile summaries, and Q&A",
+        "badge_color": "primary",
+    },
+    "llama3-8b": {
+        "name": "Meta Llama 3 8B Instruct",
+        "provider": "Meta AI",
+        "params": "8.0B",
+        "quant": "Q4_K_M",
+        "approx_size_gb": 4.9,
+        "recommended_ram_gb": 5.2,
+        "best_for": "Advanced architectural reasoning, full wiki documentation drafting, complex sprint analysis",
+        "badge_color": "info",
+    },
+    "deepseek-7b": {
+        "name": "DeepSeek Coder 7B Instruct v1.5",
+        "provider": "DeepSeek",
+        "params": "7.0B",
+        "quant": "Q4_K_M",
+        "approx_size_gb": 4.1,
+        "recommended_ram_gb": 4.5,
+        "best_for": "Deep code understanding, technical stack analysis, and system architecture docs",
+        "badge_color": "warning",
+    },
 }
 
 
@@ -78,7 +121,7 @@ class LlmEngineManager:
         return self._stats[model_key]
 
     def list_models_on_disk(self) -> dict[str, dict[str, Any]]:
-        """List all supported models, file existence, download status, and current cache status."""
+        """List all supported models, metadata specs, file existence, download status, and cache status."""
         result: dict[str, dict[str, Any]] = {}
         models_dir = Path(settings.MODELS_DIR)
 
@@ -87,18 +130,28 @@ class LlmEngineManager:
             exists = file_path.exists()
             size_gb = round(file_path.stat().st_size / (1024**3), 2) if exists else 0.0
             stats = self.get_stats(key)
+            meta = MODEL_METADATA.get(key, {})
 
             result[key] = {
                 "key": key,
+                "name": meta.get("name", key),
+                "provider": meta.get("provider", "Open Source"),
+                "params": meta.get("params", "Unknown"),
+                "quant": meta.get("quant", "Q4_K_M"),
+                "approx_size_gb": meta.get("approx_size_gb", 4.0),
+                "recommended_ram_gb": meta.get("recommended_ram_gb", 4.0),
+                "best_for": meta.get("best_for", ""),
+                "badge_color": meta.get("badge_color", "primary"),
                 "file": filename,
                 "path": str(file_path),
                 "exists_on_disk": exists,
                 "size_gb": size_gb,
                 "loaded_in_ram": key in self._models,
+                "ram_mb": stats.ram_mb if key in self._models else 0.0,
                 "total_requests": stats.total_requests,
                 "avg_duration_ms": stats.avg_duration_ms,
-                "download_status": stats.download_status,
-                "download_progress_pct": stats.download_progress_pct,
+                "download_status": stats.download_status if not exists else "completed",
+                "download_progress_pct": stats.download_progress_pct if not exists else 100,
                 "download_error": stats.download_error,
                 "download_url": MODEL_DOWNLOAD_URLS.get(key),
             }
@@ -205,7 +258,7 @@ class LlmEngineManager:
             "model_key": model_key,
             "status": "downloading",
             "progress_pct": 0,
-            "message": f"Download initiated for '{model_key}' from {url}",
+            "message": f"Download initiated for '{model_key}'.",
         }
 
     def load_model(
