@@ -1,4 +1,4 @@
-"""Admin configuration and cache management endpoints."""
+"""Admin configuration, model download, and cache management endpoints."""
 
 from typing import Any
 
@@ -57,6 +57,19 @@ async def modify_config(
     )
 
 
+@router.post("/models/{model_key}/download", response_model=ApiResponse[dict[str, Any]])
+async def download_model(
+    model_key: str,
+    _: AsyncSession = Depends(get_session),
+) -> ApiResponse[dict[str, Any]]:
+    """Trigger background download of a supported GGUF model from HuggingFace."""
+    result = engine_manager.trigger_download(model_key)
+    return ApiResponse(
+        success=True,
+        data=result,
+    )
+
+
 @router.post("/models/{model_key}/cache", response_model=ApiResponse[dict[str, Any]])
 async def preload_model_cache(
     model_key: str,
@@ -73,6 +86,25 @@ async def preload_model_cache(
     return ApiResponse(
         success=True,
         data={"model_key": model_key, "cached": True, "message": f"Model '{model_key}' successfully loaded into RAM."},
+    )
+
+
+@router.post("/models/{model_key}/reload", response_model=ApiResponse[dict[str, Any]])
+async def reload_model_cache(
+    model_key: str,
+    session: AsyncSession = Depends(get_session),
+) -> ApiResponse[dict[str, Any]]:
+    """Evict and reload a model in RAM with latest config."""
+    conf = await get_ai_config(session)
+    engine_manager.reload_model(
+        model_key=model_key,
+        n_gpu_layers=int(conf.get("n_gpu_layers", 0)),
+        n_threads=int(conf.get("n_threads", 4)),
+        n_ctx=int(conf.get("n_ctx", 4096)),
+    )
+    return ApiResponse(
+        success=True,
+        data={"model_key": model_key, "reloaded": True, "message": f"Model '{model_key}' was reloaded successfully."},
     )
 
 
