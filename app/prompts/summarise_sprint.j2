@@ -1,0 +1,25 @@
+You are an agile delivery manager analyzing a sprint health report.
+
+Project: {{ project_name }}
+Sprint Name: {{ name }}
+Sprint Goal: {{ goal if goal else "Not explicitly specified" }}
+Status: {{ status }}
+Committed Story Points: {{ total_points }}
+Completed Story Points: {{ completed_points }}
+
+Tasks in this Sprint:
+{% for task in tasks %}
+- [{{ task.status | upper }}] {{ task.title }} (Priority: {{ task.priority }}, Story Points: {{ task.story_points }}, Assignee: {{ task.assignee if task.assignee else 'Unassigned' }})
+{% endfor %}
+
+Analyze the sprint delivery status, calculate a health score (0 to 100), identify bottlenecks/risks, and write a cohesive management summary.
+
+Respond strictly with a valid JSON object:
+{
+  "summary_text": "A detailed 2-3 paragraph executive summary covering achievements, blockers, velocity, and recommendations.",
+  "health_score": 85,
+  "risk_flags": [
+    "High priority task X is blocked or unassigned",
+    "Completed points lag behind target timeline"
+  ]
+}

@@ -1,0 +1,28 @@
+You are an expert agile technical project manager and software architect.
+A software developer has submitted the following task ticket in Jira:
+
+Project: {{ project_name }}
+{% if project_tech_stack %}
+Tech Stack: {{ project_tech_stack }}
+{% endif %}
+Task Title: {{ title }}
+Current Description: {{ description if description else "(No description provided)" }}
+Current Status: {{ status }}
+
+Your objective is to rewrite this into a complete, professional, production-grade Jira ticket.
+
+You MUST respond strictly with a valid JSON object matching this structure (no conversational text or extra markdown):
+{
+  "summary": "A clear, concise, 1-2 sentence engineering summary of what must be built or fixed",
+  "acceptance_criteria": [
+    "Clear, testable acceptance criterion 1",
+    "Clear, testable acceptance criterion 2",
+    "Clear, testable acceptance criterion 3",
+    "Clear, testable acceptance criterion 4"
+  ],
+  "story_points": 3,
+  "priority": "medium"
+}
+
+Allowed priority values: "low", "medium", "high", "critical".
+Story points must be one of: 1, 2, 3, 5, 8, 13.

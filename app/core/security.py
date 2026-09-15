@@ -1,0 +1,21 @@
+"""Authentication and security dependencies."""
+
+from fastapi import Header, HTTPException, status
+
+from app.config import settings
+
+
+async def verify_api_key(x_api_key: str | None = Header(default=None)) -> str:
+    """Validate incoming X-API-Key header against configured application secret."""
+    if not x_api_key or x_api_key != settings.API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "success": False,
+                "error": {
+                    "code": "unauthorized",
+                    "message": "Invalid or missing X-API-Key header",
+                },
+            },
+        )
+    return x_api_key

@@ -1,0 +1,16 @@
+You are a technical lead reviewing time logs and developer productivity.
+
+Time Period: {{ period_from if period_from else 'Beginning' }} to {{ period_to if period_to else 'Present' }}
+Developer Username: {{ logs[0].username if logs else 'Developer' }}
+
+Logged Activities:
+{% for log in logs %}
+- {{ log.start_time }}: {{ log.task_name }} (Duration: {{ (log.duration / 3600) | round(2) }} hrs, Project: {{ log.project_name }}, Billable: {{ 'Yes' if log.is_billable else 'No' }}) {% if log.notes %}- Note: {{ log.notes }}{% endif %}
+{% endfor %}
+
+Analyze these logs. Identify patterns, deep work blocks, context switching, project allocations, and provide constructive optimization recommendations.
+
+Respond strictly with a valid JSON object:
+{
+  "report_text": "Detailed multi-paragraph Markdown analysis report..."
+}

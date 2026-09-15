@@ -1,0 +1,41 @@
+version: '3.8'
+
+# Standalone and Interconnected Docker Compose for ML Chege Jira
+# Usage: docker compose up --build -d
+# Connects to the existing hosts-shared-network used by Chege Jira WebApp & MySQL
+
+services:
+  ml-chege-jira:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ml-chege-jira:latest
+    container_name: ml-chege-jira
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - API_KEY=chege_jira_ml_super_secret_key_2026
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=root_password
+      - DB_NAME=db_chege_jira
+      - MODELS_DIR=/app/models
+      - DEFAULT_MODEL=mistral-7b
+      - N_GPU_LAYERS=0
+      - N_THREADS=4
+      - N_CTX=4096
+    volumes:
+      - ./models:/app/models:rw
+      - ./app:/app/app:ro
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true
+    name: hosts-shared-network
