@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import v1_router
+from app.api.v1.health import router as health_router
 from app.config import settings
 from app.db.schema_guard import ensure_ai_tables_exist
 from app.db.session import engine
@@ -58,7 +59,7 @@ def create_app() -> FastAPI:
     # CORS Configuration
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.ALLOWED_ORIGINS,
+        allow_origins=["*"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -66,6 +67,8 @@ def create_app() -> FastAPI:
 
     # Mount v1 Master Router
     app.include_router(v1_router)
+    # Expose health at root for infrastructure checks
+    app.include_router(health_router)
 
     # Validation Error Handler
     @app.exception_handler(RequestValidationError)

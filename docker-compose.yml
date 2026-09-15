@@ -24,6 +24,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=root_password
       - DB_NAME=db_chege_jira
+      - REDIS_URL=redis://redis:6379/0
       - MODELS_DIR=/app/models
       - DEFAULT_MODEL=mistral-7b
       - N_GPU_LAYERS=0

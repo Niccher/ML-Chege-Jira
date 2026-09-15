@@ -11,6 +11,7 @@ from app.api.v1.resources.qa import router as qa_router
 from app.api.v1.resources.sprints import router as sprints_router
 from app.api.v1.resources.tasks import router as tasks_router
 from app.api.v1.resources.time_reports import router as time_reports_router
+from app.api.v1.resources.background_tasks import router as background_tasks_router
 
 v1_router = APIRouter(prefix="/api/v1")
 
@@ -28,3 +29,4 @@ v1_router.include_router(sprints_router)
 v1_router.include_router(projects_router)
 v1_router.include_router(time_reports_router)
 v1_router.include_router(qa_router)
+v1_router.include_router(background_tasks_router)

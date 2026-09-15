@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     DB_USER: str = "root"
     DB_PASSWORD: str = "root_password"
     DB_NAME: str = "db_chege_jira"
+    REDIS_URL: str = "redis://redis:6379/0"
 
     # LLM Settings
     MODELS_DIR: Path = Path("/app/models")
