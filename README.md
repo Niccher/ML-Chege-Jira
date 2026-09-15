@@ -1,67 +1,95 @@
 # ML Chege Jira
 
-High-performance, pure REST API micro-service hosting open-source Large Language Models (LLMs) via `llama-cpp-python` for the **Chege Jira WebApp**.
+High-performance local LLM inference microservice and AI copilot backend for Chege Jira WebApp. Powered by Python 3.11+, FastAPI, and `llama-cpp-python` for quantized on-premise GGUF model execution.
 
----
+Stack: Python 3.11+, FastAPI, llama.cpp, SQLAlchemy (Async MySQL), Redis.
 
-## 🌟 What This Service Does
+**If you only need to run the system, this page is enough.**  
+Software engineers: [docs/README.md](docs/README.md).
 
-- **Task Ticket Enhancement**: Expands short titles or bullet points into comprehensive Jira tickets with acceptance criteria, story point estimates, and priority suggestions.
-- **Sprint Health Summaries**: Automatically analyzes sprint completion rate, remaining velocity, open blockers, and time log distributions.
-- **Wiki Documentation Generation**: Generates comprehensive project architecture and onboarding documentation directly into `project_wiki_pages`.
-- **Productivity & Time Analysis**: Produces natural language developer time-log analysis reports.
-- **Real-Time Admin Telemetry & Control**: Exposes container CPU, RAM, disk, model cache stats, and runtime configuration controls directly to the PHP Admin panel.
+## What “running” looks like
 
----
+| Service / Endpoint | URL / Command | Expected Response |
+|--------------------|---------------|-------------------|
+| API Health Check | `GET http://localhost:8000/api/v1/health` | `{"status":"ok","version":"0.1.0"}` |
+| System Telemetry | `GET http://localhost:8000/api/v1/admin/telemetry` | CPU, RAM, Disk, MySQL, Redis JSON |
+| Active Model Vitals | `GET http://localhost:8000/api/v1/models/active` | Model details & loaded status |
+| Interactive Swagger | `http://localhost:8000/docs` | Available when `APP_ENV=development` |
 
-## 🚀 Getting Started
+## Prerequisites
 
-### 1. Prerequisites
-- Docker Engine & Docker Compose
-- Shared network `hosts-shared-network` running with MySQL (started from `Chege Jira WebApp`)
+### Option A — Docker Compose (Recommended)
+- Git
+- Docker Engine 24+ and Docker Compose v2 (or Docker Desktop)
 
-### 2. Download at least one GGUF model
-```bash
-chmod +x scripts/download_model.sh
-./scripts/download_model.sh phi3-mini
-# or: ./scripts/download_model.sh mistral-7b
-```
+### Option B — Without Docker (Native Linux / macOS)
+- Python 3.11 or 3.12 with `uv` or `pip`
+- C/C++ compiler toolchain (`build-essential`, `cmake`, `libopenblas-dev`)
+- Running MySQL 8.0+ and Redis 7.0+ instances
 
-### 3. Start the Container
-```bash
-docker compose up --build -d
-```
+## Setup and Run
 
-### 4. Verify Health & Telemetry
-```bash
-curl http://localhost:8000/api/v1/health
-curl http://localhost:8000/api/v1/admin/telemetry -H "X-API-Key: chege_jira_ml_super_secret_key_2026"
-```
+From a fresh machine:
 
----
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Niccher/ML-Chege-Jira.git
+   cd ML-Chege-Jira
+   ```
 
-## 📚 API Endpoints Summary
+2. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   ```
 
-All requests require the `X-API-Key` header and return standard JSON envelopes.
+3. **Download a lightweight GGUF model:**
+   ```bash
+   bash scripts/download_model.sh phi3-mini
+   ```
 
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/v1/health` | Health & liveness status |
-| `GET` | `/api/v1/models` | List available models on disk |
-| `POST` | `/api/v1/tasks/{id}/enhancements` | Expand task into full Jira ticket |
-| `POST` | `/api/v1/tasks/{id}/priority-suggestions` | Suggest priority & story points |
-| `POST` | `/api/v1/sprints/{id}/summaries` | Generate sprint health summary |
-| `POST` | `/api/v1/projects/{id}/wiki-pages` | Auto-generate and publish wiki page |
-| `POST` | `/api/v1/time-reports` | Produce developer time log report |
-| `POST` | `/api/v1/qa` | Project-grounded Q&A |
-| `GET` | `/api/v1/admin/telemetry` | Container vitals & LLM cache metrics |
-| `GET` | `/api/v1/admin/config` | Read current runtime configuration |
-| `PATCH` | `/api/v1/admin/config` | Update default model, threads, GPU layers |
-| `POST` | `/api/v1/admin/models/{key}/cache` | Pre-load model into RAM |
-| `DELETE` | `/api/v1/admin/models/{key}/cache` | Evict model from RAM |
+4. **Start the container stack:**
+   ```bash
+   docker compose up --build -d
+   ```
 
----
+5. **Verify service health:**
+   ```bash
+   curl -f http://localhost:8000/api/v1/health
+   ```
 
-## 🛠️ Software Engineers
+6. **Stop the stack:**
+   ```bash
+   docker compose down
+   ```
 
-For architecture details, database schemas, and testing instructions, please read [docs/README.md](docs/README.md).
+## Configuration Users May Change
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `APP_PORT` | `8000` | HTTP port exposed by the microservice |
+| `API_KEY` | `chege_jira_ml_super_secret_key_2026` | Shared secret header (`X-API-Key`) |
+| `DB_HOST` | `mysql` | MySQL hostname or Railway service name |
+| `DB_PORT` | `3306` | MySQL port |
+| `REDIS_URL` | `redis://redis:6379/0` | Redis connection URL for caching & jobs |
+| `DEFAULT_MODEL` | `phi3-mini` | Active GGUF model identifier |
+| `N_THREADS` | `4` | CPU inference threads |
+| `N_CTX` | `4096` | Context window size in tokens |
+
+Full settings reference: [docs/user/configuration.md](docs/user/configuration.md).
+
+## Something Went Wrong?
+
+- **Port 8000 already in use:** Change `APP_PORT=8005` in `.env` and `docker-compose.yml`.
+- **Database connection error:** Ensure MySQL container is healthy on the shared Docker network.
+- **Model weights not found:** Run `bash scripts/download_model.sh phi3-mini` to populate `models/`.
+- **High RAM usage:** Switch to a smaller model quantization (`Q4_K_M`) or reduce `N_CTX=2048`.
+
+Detailed recovery steps: [docs/user/troubleshooting.md](docs/user/troubleshooting.md).
+
+## Software Engineers
+
+- System Architecture: [docs/architecture/overview.md](docs/architecture/overview.md)
+- Inter-Service Communication: [docs/architecture/communication.md](docs/architecture/communication.md)
+- OpenAPI Specification: [docs/api/openapi.yaml](docs/api/openapi.yaml)
+- Local Development & Testing: [docs/engineering/local-development.md](docs/engineering/local-development.md)
+- Making Safe Changes: [docs/engineering/making-changes.md](docs/engineering/making-changes.md)

@@ -1,0 +1,77 @@
+site_name: ML Chege Jira Documentation
+site_description: Technical architecture, operational runbooks, and API documentation for ML Chege Jira.
+site_author: Chege Jira Team
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+
+nav:
+  - Home: README.md
+  - User Guide:
+      - Setup & Run: user/setup-and-run.md
+      - Configuration: user/configuration.md
+      - Troubleshooting: user/troubleshooting.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Communication: architecture/communication.md
+      - Data & Storage: architecture/data-and-storage.md
+      - Deployment: architecture/deployment.md
+      - Threat Model: architecture/threat-model.md
+  - API Reference:
+      - REST Contract: api/contract.md
+  - Services & Engines:
+      - FastAPI Backend: services/fastapi.md
+      - ML & LLM Engine: services/ml.md
+  - Engineering:
+      - Local Development: engineering/local-development.md
+      - Making Changes: engineering/making-changes.md
+      - Database & Schema: engineering/database.md
+      - Testing: engineering/testing.md
+      - CI/CD Pipelines: engineering/ci.md
+      - Contributing: engineering/contributing.md
+      - Security: engineering/security.md
+      - Release Train: engineering/release.md
+      - Troubleshooting: engineering/troubleshooting.md
+  - Runbooks:
+      - Restart & Recovery: runbooks/restart.md
+      - Backup & Restore: runbooks/backup-and-restore.md
+  - Architecture Decisions (ADR):
+      - 0001 Local Inference: adr/0001-llama-cpp-python-local-inference.md
+      - 0002 Async Schema Guard: adr/0002-async-schema-guard-mysql.md
+      - 0003 API Key Auth: adr/0003-header-based-api-key-auth.md

@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: ML Chege Jira API
+  description: High-performance local LLM inference microservice and async AI worker backend for Chege Jira WebApp.
+  version: 0.1.0
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://artistic-embrace-production-e565.up.railway.app/api/v1
+    description: Railway Production cluster
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check liveness probe
+      security: []
+      responses:
+        '200':
+          description: Service is healthy and operational
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  version:
+                    type: string
+                    example: 0.1.0
+
+  /admin/telemetry:
+    get:
+      summary: Get live container hardware metrics
+      responses:
+        '200':
+          description: Telemetry statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  cpu_percent:
+                    type: number
+                  ram_percent:
+                    type: number
+
+  /models:
+    get:
+      summary: List all registered LLMs and disk status
+      responses:
+        '200':
+          description: Model registry list
+
+  /tasks/enhance:
+    post:
+      summary: Enhance task description with AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_id
+                - title
+              properties:
+                task_id:
+                  type: integer
+                title:
+                  type: string
+                description:
+                  type: string
+                tech_stack:
+                  type: string
+      responses:
+        '200':
+          description: Enhanced task details
+
+  /async-tasks/generate:
+    post:
+      summary: Queue long-running background AI job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_type
+                - entity_id
+              properties:
+                task_type:
+                  type: string
+                entity_id:
+                  type: integer
+      responses:
+        '202':
+          description: Task accepted and queued
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key

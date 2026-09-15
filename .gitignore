@@ -3,8 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
+# C extensions & dynamic libs
 *.so
+*.dylib
+*.dll
 
 # Distribution / packaging
 .Python
@@ -28,6 +30,8 @@ MANIFEST
 
 # Virtual environments
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
@@ -35,20 +39,31 @@ ENV/
 env.bak/
 venv.bak/
 
-# Testing & Linting
+# Testing, Coverage & Linting
 .coverage
 htmlcov/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+coverage.xml
 
 # Large Model weights (GGUF binaries)
 models/*.gguf
 models/*.bin
+models/*.safetensors
+models/*.pth
+models/*.pt
 !models/.gitkeep
 
-# IDEs
+# IDEs & Operating Systems
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Documentation site build
+site/
+.cache

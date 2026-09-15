@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python byte-code & virtualenvs
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv
+venv
+env
+
+# Tests & Quality tools
+tests
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
+coverage.xml
+
+# Documentation & artifacts
+docs
+site
+mkdocs.yml
+.github
+*.md
+!README.md
+
+# Large Model weights (mount via volume instead of baking into image)
+models/*.gguf
+models/*.bin
+models/*.safetensors
+
+# IDEs & OS
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
